@@ -78,7 +78,7 @@ for P in $deps ; do
         for F in /devel/dist/ftp.gnome.org/${ARCH}/${module}${M}{_,-}${version}{_${ARCH},}.zip; do
             [ -f $F ] && {
                 echo Unzipping $F
-                /opt/misc/bin/unzip -q $F
+                unzip -q $F
                 gotit=y
                 echo `basename $F .zip` >>share/doc/$THIS/components.lst
                 break
@@ -88,9 +88,9 @@ for P in $deps ; do
     done
 done
 
-/opt/misc/bin/zip -q -r -D $zipfile .
+zip -q -r -D $zipfile .
 
-/opt/misc/bin/zip -q -d $zipfile 'manifest/*'
+zip -q -d $zipfile 'manifest/*'
 
 echo "This is a bundle containing the GTK+ stack and its dependencies
 for Windows.  As such it is nothing more than a combination of the
@@ -122,9 +122,9 @@ To use the MS-Windows theme engine, create a file etc/gtk-2.0/gtkrc
 containing the line:
     gtk-theme-name = "'"MS-Windows"' >$THIS.README.txt
 
-/opt/mingw/bin/unix2dos $THIS.README.txt
+unix2dos $THIS.README.txt
 
-/opt/misc/bin/zip $zipfile $THIS.README.txt
+zip $zipfile $THIS.README.txt
 
 cd /
 rm -rf $temp
