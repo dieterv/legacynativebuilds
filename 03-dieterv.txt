@@ -1,0 +1,44 @@
+From - Sat Apr 09 09:54:08 2011
+Message-ID: <4DA0109F.7030900@optionexplicit.be>
+Date: Sat, 09 Apr 2011 09:54:07 +0200
+From: Dieter Verfaillie <dieterv@optionexplicit.be>
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.15) Gecko/20110303 Thunderbird/3.1.9
+MIME-Version: 1.0
+To: Tor Lillqvist <tml@iki.fi>
+Subject: Re: GTK+ on Windows
+References: <4D9B8F5E.5070301@optionexplicit.be> <BANLkTi=3b+K8VG5bxM5eYwx=BLbPQ+OZ0w@mail.gmail.com>
+In-Reply-To: <BANLkTi=3b+K8VG5bxM5eYwx=BLbPQ+OZ0w@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+On 06/04/2011 00:23, Tor Lillqvist wrote:
+> I hope the above helps a bit, don't hesitate to ask more!
+
+Thanks! Had a list of questions, but managed to answer most myself
+by reading the packages' build scripts.
+
+> I really think you should look into start using the Build Service
+> stuff already for GTK+ 2.x...
+
+Yes OBS is amazing, but we feel it would be too much of a change on
+such short notice (PyGTK 2.24 windows binaries are ready, if tests
+go well they'll be released today/tomorrow). That and users will
+be nagging us for the gtk+-2.24 bundle ;)
+
+The good news is that we'll have more than enough time to investigate
+OBS for the next generation of Python bindings. Started work on
+porting gobject-instrospection (needed by PyGObject), but it's going
+slow (there's only so many hours a day). Even found your patch on
+bugzilla. Thanks for that, it sure is helpful!
+
+> Cross-compiling is so much nicer than
+> building this stuff locally on Windows. But yeah, there might be
+> details relevant to PyGTK that I don't know of that complicates
+> matters.
+
+Is it OK if I document your build environment on live.gnome.org?
+Something like a GTK+/Win32/LegacyNativeBuilds? Also, what (if any)
+license is to be attached to your scripts?
+
+Thanks,
+Dieter

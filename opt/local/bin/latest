@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# Copyright (c) 2011 Tor Lillqvist. This script is licensed under the
+# MIT/X11 license. See http://www.opensource.org/licenses/mit-license
+
+result=""
+
+arch=win32
+pkgnames=no
+while test "$1" != "${1#--}"; do
+    case "$1" in
+        --arch=*)
+            arch=${1#--arch=}
+            case "$arch" in
+                win32|win64)
+                    ;;
+                *)
+                    echo Unknown architecture $arch
+                    exit 1
+                    ;;
+            esac
+            ;;
+        --pkgnames)
+            pkgnames=yes
+            ;;
+        *)  echo Unknown option $1
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+for i in $*; do
+    gotit=""
+    while read module version morestuff; do
+        if [ "#" = $module ]; then
+            :
+        elif [ $i = $module ]; then
+            if test $pkgnames = yes; then
+                result="$result ${module}_${version}_${arch}"
+            else
+                result="$result ${module}-${version}"
+            fi
+            gotit=y
+        fi
+    done < /devel/dist/${arch}/LATEST
+    [ "$gotit" ] || echo Module $i not found >&2
+done
+
+echo $result
+
+exit 0

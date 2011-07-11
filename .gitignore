@@ -1,0 +1,5 @@
+devel/dist/win32/*
+devel/dist/win64/*
+devel/src/gnome/*
+devel/target/HEAD/*
+devel/target/stable/*

@@ -1,0 +1,41 @@
+From - Sat Apr 09 10:45:09 2011
+Return-Path: <tlillqvist@gmail.com>
+MIME-Version: 1.0
+Sender: tlillqvist@gmail.com
+In-Reply-To: <4DA0109F.7030900@optionexplicit.be>
+References: <4D9B8F5E.5070301@optionexplicit.be> <BANLkTi=3b+K8VG5bxM5eYwx=BLbPQ+OZ0w@mail.gmail.com>
+ <4DA0109F.7030900@optionexplicit.be>
+From: Tor Lillqvist <tml@iki.fi>
+Date: Sat, 9 Apr 2011 11:39:39 +0300
+Message-ID: <BANLkTikGZQtfxkXHR5f7mCy-87=TuYWbDQ@mail.gmail.com>
+Subject: Re: GTK+ on Windows
+To: Dieter Verfaillie <dieterv@optionexplicit.be>
+Content-Type: text/plain; charset=UTF-8
+
+> Is it OK if I document your build environment on live.gnome.org?
+
+Sure, that would be very nice.
+
+> Something like a GTK+/Win32/LegacyNativeBuilds? Also, what (if any)
+> license is to be attached to your scripts?
+
+Oh,  I could just place them in the public domain. Except that such a
+concept has no legal meaning in many countries, including mine, I
+think. What is the shortest but also very permissible Open Source
+license?  MIT/X11? Even that is longer, word-count-wise, than the
+shell scripts...
+
+Let's do it formally, I hereby allow you to publish them freely if you
+attach the following license blurb to them, hmm except pkg-config.sh,
+which I think Owen Taylor posted in a mail a long time ago.
+
+=== CUT HERE ===
+Copyright (c) 2011 Tor Lillqvist. This script is licensed under the
+MIT/X11 license. See http://www.opensource.org/licenses/mit-license
+=== CUT HERE ===
+
+Thanks,
+
+--tml
+
+

@@ -1,0 +1,132 @@
+#!/bin/sh
+
+# Copyright (c) 2011 Tor Lillqvist. This script is licensed under the
+# MIT/X11 license. See http://www.opensource.org/licenses/mit-license
+
+set -o errexit
+
+ARCH="$1"
+
+case "$ARCH" in
+    win32|win64)
+        ;;
+    *)
+        echo Pass win32 or win64 as an argument
+        exit 1
+        ;;
+esac
+
+STACK="gettext-runtime zlib glib pkg-config atk pango pixman cairo fontconfig expat freetype libpng"
+
+if [ "$GTK216" ]; then
+    GTKPACKAGENAME=gtk216
+else
+    GTKPACKAGENAME=gtk+
+    GDKPIXBUF=gdk-pixbuf
+fi
+
+STACK="$STACK $GTKPACKAGENAME $GDKPIXBUF"
+
+deps=""
+for i in $STACK; do
+    gotit=""
+    while read module version morestuff; do
+        [ $i = $module ] && {
+            deps="$deps $module:$version"
+            gotit=y
+        }
+    done < /devel/dist/$ARCH/LATEST
+    [ "$gotit" ] || echo Module $i not found >&2
+done
+
+#if [ "$ARCH" = win32 ]; then
+#    deps="$deps gettext-tools:0.17"
+#fi
+
+GTK=`latest --arch=${ARCH} $GTKPACKAGENAME`
+GTK=${GTK#$GTKPACKAGENAME-}
+GTK=${GTK%-[1-9]*}
+TIMESTAMP=`date +%Y%m%d`
+THIS=gtk+-bundle_${GTK}-${TIMESTAMP}_${ARCH}
+
+zipfile=/tmp/$THIS.zip
+rm -f $zipfile
+
+echo Building $zipfile
+
+temp=/tmp/$THIS-$RANDOM
+mkdir $temp
+cd $temp
+
+echo Using directory $temp
+
+mkdir -p share/doc/$THIS
+
+for P in $deps ; do
+    i=`expr index $P :`
+    j=`expr $i - 1`
+    k=`expr $i + 1`
+    module=`expr substr $P 1 $j`
+    version=`expr substr $P $k 100`
+    if [ "GTK216" -a $module = gtk216 ]; then
+        module=gtk+
+    fi
+
+    echo Including $module-$version
+    gotit=
+    for M in '' '-dev'; do
+        for F in /c/tmp/dist/${module}${M}{_,-}${version}{_${ARCH},}.zip; do
+            [ -f $F ] && {
+                echo Unzipping $F
+                /opt/misc/bin/unzip -q $F
+                gotit=y
+                echo `basename $F .zip` >>share/doc/$THIS/components.lst
+                break
+            }
+        done
+        [ "$gotit" ] || echo $module$M-$version not found >&2
+    done
+done
+
+/opt/misc/bin/zip -q -r -D $zipfile .
+
+/opt/misc/bin/zip -q -d $zipfile 'manifest/*'
+
+echo "This is a bundle containing the GTK+ stack and its dependencies
+for Windows.  As such it is nothing more than a combination of the
+individual packages it consists of. For a list, see
+share/doc/$THIS/components.lst.
+
+Both run-time and developer packages are included.
+
+This bundle is intended for software developers and packagers. You are
+expected to know what to do with it, more or less.
+
+To use it, create some empty folder like c:\opt\gtk . Using either
+Windows Explorer's built-in zip file management, or the command-line
+unzip.exe, available for instance at
+ftp://tug.ctan.org/tex-archive/tools/zip/info-zip/WIN32/unz552xN.exe
+unzip this bundle. Avoid Winzip! It is known to behave oddly.
+
+(But you presumably already did extract the files, as you are reading
+this file.)
+
+Then add the bin folder to your PATH. Make sure you have no other
+versions of GTK+ in PATH. Run:
+    pkg-config --cflags gtk+-2.0
+and verify that it prints out something reasonable. Run:
+    gtk-demo
+and verify that it works.
+
+To use the MS-Windows theme engine, create a file etc/gtk-2.0/gtkrc
+containing the line:
+    gtk-theme-name = "'"MS-Windows"' >$THIS.README.txt
+
+/opt/mingw/bin/unix2dos $THIS.README.txt
+
+/opt/misc/bin/zip $zipfile $THIS.README.txt
+
+cd /
+rm -rf $temp
+
+manifestify $zipfile

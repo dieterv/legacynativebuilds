@@ -1,0 +1,511 @@
+From - Wed Apr 06 00:30:26 2011
+Return-Path: <tlillqvist@gmail.com>
+MIME-Version: 1.0
+Sender: tlillqvist@gmail.com
+In-Reply-To: <4D9B8F5E.5070301@optionexplicit.be>
+References: <4D9B8F5E.5070301@optionexplicit.be>
+From: Tor Lillqvist <tml@iki.fi>
+Date: Wed, 6 Apr 2011 01:23:55 +0300
+Message-ID: <BANLkTi=3b+K8VG5bxM5eYwx=BLbPQ+OZ0w@mail.gmail.com>
+Subject: Re: GTK+ on Windows
+To: Dieter Verfaillie <dieterv@optionexplicit.be>
+Content-Type: text/plain; charset=UTF-8
+
+> Would you be willing to share your complete build environment/scripts
+> you've created over the years used to build the packages and gtk+-bundle
+> as they are currently available on [2] so we can continue supporting
+> the 2.24 cycle on Windows?
+
+Sure. Thanks for asking, I should have written up this earlier already.
+
+In each of my -dev packages on ftp.gnome.org (well, the ones from the
+last couple of years at least) there is a .sh script that was the
+top-level script I used to build it. But those scripts are not
+free-standing and usable by themselves, they are provided just for
+reference/documentation. They require a bunch of shell functions and
+scripts I have been using. Here should be the relevant ones, with a
+bit of comments:
+
+First a description of my development machine:
+
+I have MinGW installed nowadays in the recommended default, c:/MinGW,
+and MSYS then below that in C:/MinGW/msys. I have various local
+scripts and binaries in /opt/local/bin. MSVS6 and MSVS 2008 are in
+/opt/MSVS6 and /opt/MSVS9 (used just in some build scripts to generate
+the MSVC-compatible import library).
+
+I have all development stuff under /devel. Under /devel/dist/win32 and
+win64 I have as unzipped the packages that I have distributed, for
+instance /devel/dist/win64/glib-2.26.1-1 . Under /devel/target I have
+trees with my "work" builds of git checkouts, built with
+debugging. Stuff from master (development) branches under
+/devel/target/HEAD, stuff from the latest stable branches under
+/devel/target/stable.
+
+ActiveState Perl is installed in /opt/local/perl.
+
+In /opt/misc I have miscellaneous open source binaries from elsewhere.
+
+Here are the relevant bits of my MSYS /etc/bash_profile:
+=== CUT HERE ===
+export PKG_CONFIG=/opt/local/bin/pkg-config.sh
+
+function prepend_dir_to_path() {
+  [ -d "$2" ] && {
+      local expr="export $1='$2'"
+      local oldval="`eval echo '$'$1`"
+      test -z "$oldval" || expr="$expr:'""$oldval""'"
+      # echo $expr
+      eval $expr
+  }
+}
+
+function prepend_option_dir_to_var() {
+  [ -d "$3" ] && {
+      local expr="export $1='-I $3'"
+      local oldval="`eval echo '$'$1`"
+      test -z "$oldval" || expr="$expr' ""$oldval""'"
+      # echo $expr
+      eval $expr
+  }
+}
+
+PATH=/bin:$PATH
+prepend_dir_to_path PATH /opt/local/bin
+
+BASEPATH=$PATH
+
+export LT_NO_LA_FILES=y
+
+export ACLOCAL_FLAGS="-I /usr/share/aclocal"
+
+export INTLTOOL_PERL=/opt/perl/bin/perl
+export INTLTOOL_ICONV=/opt/gnu/bin/iconv
+
+export CVS_RSH=/opt/misc/bin/plink
+export SVN_SSH=/opt/misc/bin/plink
+export GIT_SSH=/opt/misc/bin/plink.exe
+
+# This seems to work with Visual Studio:
+export _NT_SYMBOL_PATH='SRV*c:\tmp\symbols*http://msdl.microsoft.com/download/symbols'
+
+function usebase() {
+  PATH="$BASEPATH"
+  export PKG_CONFIG_PATH=/dummy
+  export ACLOCAL_FLAGS="-I /usr/share/aclocal"
+  unset LIB
+  unset INCLUDE
+}
+
+function usemingw32() {
+  usebase
+  prepend_dir_to_path PATH /mingw/bin
+}
+
+function usemingw() {
+  usemingw32
+}
+
+function usedev() {
+  usemingw
+  prepend_dir_to_path PATH /opt/misc/bin
+}
+
+function usestable() {
+  usedev
+  prepend_dir_to_path PATH /devel/target/stable/bin
+
+  prepend_dir_to_path PKG_CONFIG_PATH /opt/misc/lib/pkgconfig
+  prepend_dir_to_path PKG_CONFIG_PATH /opt/freetype/lib/pkgconfig
+  prepend_dir_to_path PKG_CONFIG_PATH /devel/target/stable/share/pkgconfig
+  prepend_dir_to_path PKG_CONFIG_PATH /devel/target/stable/lib/pkgconfig
+
+  ACLOCAL_FLAGS=""
+  prepend_option_dir_to_var ACLOCAL_FLAGS -I /opt/misc/share/aclocal
+
+  prepend_option_dir_to_var ACLOCAL_FLAGS -I /devel/target/stable/share/aclocal
+}
+
+function usehead() {
+  usestable
+
+  prepend_dir_to_path PATH /devel/target/HEAD/bin
+
+  prepend_dir_to_path PKG_CONFIG_PATH /devel/target/HEAD/share/pkgconfig
+  prepend_dir_to_path PKG_CONFIG_PATH /devel/target/HEAD/lib/pkgconfig
+
+  prepend_option_dir_to_var ACLOCAL_FLAGS -I /devel/target/HEAD/share/aclocal
+}
+
+function usemingw64() {
+  prepend_dir_to_path PATH /opt/mingw64/bin
+}
+
+function usemsvs6() {
+  PATH="/opt/MSVS6/VC98/Bin:/opt/MSVS6/Common/MSDev98/Bin:/opt/MSVS6/Common/Tools:$PATH"
+  export INCLUDE='c:\opt\MSVS6\VC98\Include'
+  export LIB='c:\opt\MSVS6\VC98\Lib'
+}
+
+function usemsvs7() {
+  PATH="/opt/MSVS7/Vc7/bin:/opt/MSVS7/Common7/IDE:/opt/MSVS7/SDK/v1.1/bin:$PATH"
+  export INCLUDE='c:\opt\MSVS7\Vc7\include;c:\opt\psdk\Include'
+  export LIB='c:\opt\MSVS7\Vc7\lib;\opt\psdk\Lib'
+}
+
+function usemsvs9() {
+  prepend_dir_to_path PATH /opt/MSVS9/VC/bin
+  prepend_dir_to_path PATH /opt/MSVS9/Common7/IDE
+  prepend_dir_to_path PATH /opt/MSVS9/Common7/Tools
+  prepend_dir_to_path PATH /opt/winsdk7/Bin
+
+  export INCLUDE='c:\opt\MSVS9\VC\include;c:\Program Files\Microsoft
+SDKs\Windows\v7.0\Include'
+  export LIB='c:\opt\MSVS9\VC\lib;c:\Program Files\Microsoft
+SDKs\Windows\v7.0\Lib'
+}
+
+function usemsvs9x64() {
+  prepend_dir_to_path PATH /opt/MSVS9/VC/bin
+  prepend_dir_to_path PATH /opt/MSVS9/VC/bin/amd64
+  prepend_dir_to_path PATH /opt/MSVS9/Common7/IDE
+  prepend_dir_to_path PATH /opt/MSVS9/Common7/Tools
+  prepend_dir_to_path PATH /opt/winsdk7/Bin
+  prepend_dir_to_path PATH /opt/winsdk7/Bin/x64
+
+  export INCLUDE='c:\opt\MSVS9\VC\include;c:\Program Files\Microsoft
+SDKs\Windows\v7.0\Include'
+  export LIB='c:\opt\MSVS9\VC\lib\amd64;c:\Program Files\Microsoft
+SDKs\Windows\v7.0\Lib\x64'
+}
+
+function usepython() {
+  PATH="/opt/python26:$PATH"
+}
+
+function usegimp26() {
+  prepend_dir_to_path PATH /devel/target/gegl/bin
+  prepend_dir_to_path PATH /devel/target/gimp/2.6/bin
+
+  prepend_dir_to_path PKG_CONFIG_PATH /devel/target/gegl/lib/pkgconfig
+  prepend_dir_to_path PKG_CONFIG_PATH /devel/target/gimp/2.6/lib/pkgconfig
+}
+
+function usegimphead() {
+  prepend_dir_to_path PATH /devel/target/gegl/bin
+  prepend_dir_to_path PATH /devel/target/gimp/HEAD/bin
+
+  prepend_dir_to_path PKG_CONFIG_PATH /devel/target/gegl/lib/pkgconfig
+  prepend_dir_to_path PKG_CONFIG_PATH /devel/target/gimp/HEAD/lib/pkgconfig
+}
+
+function usedistarch() {
+  local arch=$1
+  [ -d /devel/dist/win${arch} ] || { echo No such arch
+'"'win${arch}'"' >&2; exit 1; }
+  usemingw${arch}
+  while read module version morestuff; do
+    if [ "#" = $module ]; then
+      :
+    else
+      D=/devel/dist/win${arch}/$module-$version
+      [ -d $D/bin ] && PATH=$D/bin:$PATH
+      [ -d $D/lib/libglade/2.0 ] &&
+LIBGLADE_MODULE_PATH=$D/lib/libglade/2.0:$LIBGLADE_MODULE_PATH
+      if [ -d $D/lib/pkgconfig ] ; then
+          PKG_CONFIG_PATH=$D/lib/pkgconfig:$PKG_CONFIG_PATH
+      elif [ -d $D/share/pkgconfig ] ; then
+          PKG_CONFIG_PATH=$D/share/pkgconfig:$PKG_CONFIG_PATH
+      fi
+      [ -d $D/lib/pkgconfig ] &&
+PKG_CONFIG_PATH=$D/lib/pkgconfig:$PKG_CONFIG_PATH
+      [ -d $D/share/aclocal ] && ACLOCAL_FLAGS="-I $D/share/aclocal
+$ACLOCAL_FLAGS"
+      eval $morestuff
+    fi
+  done < /devel/dist/win${arch}/LATEST
+}
+
+function usedist() {
+  usedistarch 32
+}
+
+function usedist32() {
+  usedistarch 32
+}
+
+function usedist64() {
+  usedistarch 64
+}
+=== CUT HERE ===
+
+Then, the script /opt/local/bin/latest:
+=== CUT HERE ===
+#!/bin/sh
+
+result=""
+
+arch=win32
+pkgnames=no
+while test "$1" != "${1#--}"; do
+    case "$1" in
+        --arch=*)
+            arch=${1#--arch=}
+            case "$arch" in
+                win32|win64)
+                    ;;
+                *)
+                    echo Unknown architecture $arch
+                    exit 1
+                    ;;
+            esac
+            ;;
+        --pkgnames)
+            pkgnames=yes
+            ;;
+        *)  echo Unknown option $1
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+for i in $*; do
+    gotit=""
+    while read module version morestuff; do
+        if [ "#" = $module ]; then
+            :
+        elif [ $i = $module ]; then
+            if test $pkgnames = yes; then
+                result="$result ${module}_${version}_${arch}"
+            else
+                result="$result ${module}-${version}"
+            fi
+            gotit=y
+        fi
+    done < /devel/dist/${arch}/LATEST
+    [ "$gotit" ] || echo Module $i not found >&2
+done
+
+echo $result
+
+exit 0
+=== CUT HERE ===
+
+The script /opt/local/bin/manifestify:
+=== CUT HERE ===
+#!/bin/sh
+
+T=/tmp/manifestify-$$
+mkdir -p $T/manifest
+
+for F in $*; do
+    (
+    case $F in
+    *.zip)
+        (
+        B=`basename $F`
+        BB=`basename $B .zip`
+        case $F in
+        /*) ;;
+        *) cd `dirname $F`; F=$PWD/$B;;
+        esac
+        cd `dirname $F`
+        D=$PWD
+        /opt/misc/bin/unzip -l $B > $T/manifest/$BB.mft
+        cd $T
+        /opt/misc/bin/zip $F manifest/$BB.mft
+        N=`/opt/misc/bin/unzip -l $F | wc -l | sed -e 's/^ *\([0-9]*\).*/\1/'`
+        cd $D
+        Nm1=`expr $N - 1`
+        /opt/misc/bin/unzip -l $B | sed -e "1,3 d" -e "$Nm1,$N d" |
+awk '{print $4}' | grep -v -E '/$'> $T/manifest/$BB.mft
+        cd $T
+        /opt/misc/bin/zip $F manifest/$BB.mft
+        )
+        ;;
+    *)
+        echo Not a zip file: $F
+        ;;
+    esac
+    )
+done
+
+rm -rf $T
+=== CUT HERE ===
+
+The script /opt/local/bin/pkg-config.sh, used to work around a problem in MSYS:
+=== CUT HERE ===
+#!/bin/sh
+export PATH=/devel/dist/win32/glib-2.20.3-1/bin:$PATH
+if /devel/dist/win32/`latest pkg-config`/bin/pkg-config "$@" >
+/dev/null 2>&1 ; then
+   res=true
+else
+   res=false
+fi
+/devel/dist/win32/`latest pkg-config`/bin/pkg-config "$@" | tr -d \\r && $res
+=== CUT HERE ===
+
+The script /opt/local/bin/gtk-bundle, used to create the bundle zips:
+=== CUT HERE ===
+#!/bin/sh
+
+set -o errexit
+
+ARCH="$1"
+
+case "$ARCH" in
+    win32|win64)
+        ;;
+    *)
+        echo Pass win32 or win64 as an argument
+        exit 1
+        ;;
+esac
+
+STACK="gettext-runtime zlib glib pkg-config atk pango pixman cairo
+fontconfig expat freetype libpng"
+
+if [ "$GTK216" ]; then
+    GTKPACKAGENAME=gtk216
+else
+    GTKPACKAGENAME=gtk+
+    GDKPIXBUF=gdk-pixbuf
+fi
+
+STACK="$STACK $GTKPACKAGENAME $GDKPIXBUF"
+
+deps=""
+for i in $STACK; do
+    gotit=""
+    while read module version morestuff; do
+        [ $i = $module ] && {
+            deps="$deps $module:$version"
+            gotit=y
+        }
+    done < /devel/dist/$ARCH/LATEST
+    [ "$gotit" ] || echo Module $i not found >&2
+done
+
+#if [ "$ARCH" = win32 ]; then
+#    deps="$deps gettext-tools:0.17"
+#fi
+
+GTK=`latest --arch=${ARCH} $GTKPACKAGENAME`
+GTK=${GTK#$GTKPACKAGENAME-}
+GTK=${GTK%-[1-9]*}
+TIMESTAMP=`date +%Y%m%d`
+THIS=gtk+-bundle_${GTK}-${TIMESTAMP}_${ARCH}
+
+zipfile=/tmp/$THIS.zip
+rm -f $zipfile
+
+echo Building $zipfile
+
+temp=/tmp/$THIS-$RANDOM
+mkdir $temp
+cd $temp
+
+echo Using directory $temp
+
+mkdir -p share/doc/$THIS
+
+for P in $deps ; do
+    i=`expr index $P :`
+    j=`expr $i - 1`
+    k=`expr $i + 1`
+    module=`expr substr $P 1 $j`
+    version=`expr substr $P $k 100`
+    if [ "GTK216" -a $module = gtk216 ]; then
+        module=gtk+
+    fi
+
+    echo Including $module-$version
+    gotit=
+    for M in '' '-dev'; do
+        for F in /c/tmp/dist/${module}${M}{_,-}${version}{_${ARCH},}.zip; do
+            [ -f $F ] && {
+                echo Unzipping $F
+                /opt/misc/bin/unzip -q $F
+                gotit=y
+                echo `basename $F .zip` >>share/doc/$THIS/components.lst
+                break
+            }
+        done
+        [ "$gotit" ] || echo $module$M-$version not found >&2
+    done
+done
+
+/opt/misc/bin/zip -q -r -D $zipfile .
+
+/opt/misc/bin/zip -q -d $zipfile 'manifest/*'
+
+echo "This is a bundle containing the GTK+ stack and its dependencies
+for Windows.  As such it is nothing more than a combination of the
+individual packages it consists of. For a list, see
+share/doc/$THIS/components.lst.
+
+Both run-time and developer packages are included.
+
+This bundle is intended for software developers and packagers. You are
+expected to know what to do with it, more or less.
+
+To use it, create some empty folder like c:\opt\gtk . Using either
+Windows Explorer's built-in zip file management, or the command-line
+unzip.exe, available for instance at
+ftp://tug.ctan.org/tex-archive/tools/zip/info-zip/WIN32/unz552xN.exe
+unzip this bundle. Avoid Winzip! It is known to behave oddly.
+
+(But you presumably already did extract the files, as you are reading
+this file.)
+
+Then add the bin folder to your PATH. Make sure you have no other
+versions of GTK+ in PATH. Run:
+    pkg-config --cflags gtk+-2.0
+and verify that it prints out something reasonable. Run:
+    gtk-demo
+and verify that it works.
+
+To use the MS-Windows theme engine, create a file etc/gtk-2.0/gtkrc
+containing the line:
+    gtk-theme-name = "'"MS-Windows"' >$THIS.README.txt
+
+/opt/mingw/bin/unix2dos $THIS.README.txt
+
+/opt/misc/bin/zip $zipfile $THIS.README.txt
+
+cd /
+rm -rf $temp
+
+manifestify $zipfile
+=== CUT HERE ===
+
+The files /devel/dist/win32/LATEST and /devel/dist/win64/LATEST
+referenced above look like this:
+=== CUT HERE ===
+popt 1.10.2-tml-20050828
+jpeg 8-2
+libtiff 3.9.2-1
+zlib 1.2.5-2
+freetype 2.4.4-1
+expat 2.0.1-1
+fontconfig 2.8.0-2
+libpng 1.4.3-1
+pixman 0.20.0-1
+cairo 1.10.2-1
+etc ...
+=== CUT HERE ===
+
+I hope the above helps a bit, don't hesitate to ask more!
+
+I really think you should look into start using the Build Service
+stuff already for GTK+ 2.x... Cross-compiling is so much nicer than
+building this stuff locally on Windows. But yeah, there might be
+details relevant to PyGTK that I don't know of that complicates
+matters.
+
+--tml
+
+
+

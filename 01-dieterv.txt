@@ -1,0 +1,41 @@
+From - Tue Apr 05 23:53:34 2011
+Message-ID: <4D9B8F5E.5070301@optionexplicit.be>
+Date: Tue, 05 Apr 2011 23:53:34 +0200
+From: Dieter Verfaillie <dieterv@optionexplicit.be>
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.15) Gecko/20110303 Thunderbird/3.1.9
+MIME-Version: 1.0
+To: tml@iki.fi
+Subject: GTK+ on Windows
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+
+Hi,
+
+I've recently read your blog post [1] and would like to
+thank you for all the years of hard work you've put into
+maintaining GTK+ on Windows. The things we've been doing
+with PyGTK on Windows recently (even if it's a project slated
+for deprecation) would simply not have been possible
+without it!
+
+It is mainly with the PyGTK-2.24+friends release (and possible
+future bugfix releases) for Windows in mind that I'm contacting
+you. These Python bindings packages have (as far as I'm aware)
+always depended on the GTK+ Windows stack provided on [2] and
+after discussing the situation with my PyGTK co-maintainer
+(John Stowers) we'd really like to continue to do so (for
+GTK+-2.24.X/PyGTK-2.24.X only) and only start investigating the
+packages on openSUSE's Build Service for future
+GTK+-3/PyGObject/gobject-introspection Windows builds.
+
+Would you be willing to share your complete build environment/scripts
+you've created over the years used to build the packages and gtk+-bundle
+as they are currently available on [2] so we can continue supporting
+the 2.24 cycle on Windows?
+
+Thanks,
+Dieter Verfaillie
+
+[1]
+http://tml-blog.blogspot.com/2011/03/gtk-on-windows-i-am-not-really-doing-it.html
+[2] http://ftp.gnome.org/pub/GNOME/binaries/win32/

@@ -1,0 +1,11 @@
+popt 1.10.2-tml-20050828
+jpeg 8-2
+libtiff 3.9.2-1
+zlib 1.2.5-2
+freetype 2.4.4-1
+expat 2.0.1-1
+fontconfig 2.8.0-2
+libpng 1.4.3-1
+pixman 0.20.0-1
+cairo 1.10.2-1
+etc ...

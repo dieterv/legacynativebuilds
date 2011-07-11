@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# Copyright (c) 2011 Tor Lillqvist. This script is licensed under the
+# MIT/X11 license. See http://www.opensource.org/licenses/mit-license
+
+T=/tmp/manifestify-$$
+mkdir -p $T/manifest
+
+for F in $*; do
+    (
+    case $F in
+    *.zip)
+        (
+        B=`basename $F`
+        BB=`basename $B .zip`
+        case $F in
+        /*) ;;
+        *) cd `dirname $F`; F=$PWD/$B;;
+        esac
+        cd `dirname $F`
+        D=$PWD
+        /opt/misc/bin/unzip -l $B > $T/manifest/$BB.mft
+        cd $T
+        /opt/misc/bin/zip $F manifest/$BB.mft
+        N=`/opt/misc/bin/unzip -l $F | wc -l | sed -e 's/^ *\([0-9]*\).*/\1/'`
+        cd $D
+        Nm1=`expr $N - 1`
+        /opt/misc/bin/unzip -l $B | sed -e "1,3 d" -e "$Nm1,$N d" | awk '{print $4}' | grep -v -E '/$'> $T/manifest/$BB.mft
+        cd $T
+        /opt/misc/bin/zip $F manifest/$BB.mft
+        )
+        ;;
+    *)
+        echo Not a zip file: $F
+        ;;
+    esac
+    )
+done
+
+rm -rf $T
