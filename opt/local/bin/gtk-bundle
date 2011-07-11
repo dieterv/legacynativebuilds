@@ -75,7 +75,7 @@ for P in $deps ; do
     echo Including $module-$version
     gotit=
     for M in '' '-dev'; do
-        for F in /c/tmp/dist/${module}${M}{_,-}${version}{_${ARCH},}.zip; do
+        for F in /devel/dist/ftp.gnome.org/${ARCH}/${module}${M}{_,-}${version}{_${ARCH},}.zip; do
             [ -f $F ] && {
                 echo Unzipping $F
                 /opt/misc/bin/unzip -q $F
