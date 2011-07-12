@@ -128,6 +128,10 @@ function usemsvs9x64() {
   export LIB='c:\opt\MSVS9\VC\lib\amd64;c:\Program Files\Microsoft SDKs\Windows\v7.0\Lib\x64'
 }
 
+function usewinsdk52() {
+  prepend_dir_to_path PATH /opt/winsdk52/Bin/win64/x86/AMD64
+}
+
 function usepython() {
   PATH="/opt/python26:$PATH"
 }

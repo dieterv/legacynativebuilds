@@ -15,7 +15,7 @@ zlib 1.2.5-2
 atk 1.32.0-1
 gdk-pixbuf 2.22.1-1
 glib 2.28.1-1
-gtk+-2.24.0-1
+gtk+ 2.24.5-2
 intltool 0.40.4-1
 libcroco 0.6.2-1
 libglade 2.6.4-1
