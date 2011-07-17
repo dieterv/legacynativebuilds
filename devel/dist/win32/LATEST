@@ -10,7 +10,7 @@ jpeg 8-1
 libpng 1.4.3-1
 libxml2 2.7.7-1
 pixman 0.20.0-1
-pkg-config 0.25-1
+pkg-config 0.26-1
 zlib 1.2.5-2
 atk 1.32.0-1
 gdk-pixbuf 2.22.1-1
