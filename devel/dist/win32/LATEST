@@ -13,7 +13,7 @@ pixman 0.24.0-1
 pkg-config 0.26-1
 zlib 1.2.5-2
 atk 1.32.0-2
-gdk-pixbuf 2.22.1-1
+gdk-pixbuf 2.24.0-1
 glib 2.28.8-1
 gtk+ 2.24.5-3
 intltool 0.40.4-1
