@@ -1,6 +1,10 @@
 devel/dist/ftp.gnome.org/*
 devel/dist/win32/*
 devel/dist/win64/*
+devel/src/dieterv/packaging/*.log
+devel/src/freedesktop/*
 devel/src/gnome/*
+devel/src/tml/make/*.log
+devel/src/tml/packaging/*.log
 devel/target/HEAD/*
 devel/target/stable/*
