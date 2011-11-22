@@ -179,15 +179,14 @@ diff --git a/src/cairo-win32-surface.c b/src/cairo-win32-surface.c
 index 660aaba..59305f1 100644
 --- a/src/cairo-win32-surface.c
 +++ b/src/cairo-win32-surface.c
-@@ -630,6 +630,8 @@ _cairo_win32_surface_release_dest_image (void                    *abstract_surfa
+@@ -707,6 +707,7 @@ _cairo_win32_surface_release_dest_image (void                    *abstract_surfa
      if (!local)
  	return;
  
 +    _cairo_win32_surface_set_clip_region (surface, NULL);
-+
+     _cairo_win32_surface_convert_from_gdi_format (local->image);
+
      if (!BitBlt (surface->dc,
- 		 image_rect->x, image_rect->y,
- 		 image_rect->width, image_rect->height,
 EOF
 
 sed -e 's/need_relink=yes/need_relink=no # no way --tml/' <build/ltmain.sh >build/ltmain.temp && mv build/ltmain.temp build/ltmain.sh
